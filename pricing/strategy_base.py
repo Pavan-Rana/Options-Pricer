@@ -9,8 +9,14 @@ class BaseStrategy:
         self.risk_free_rate = risk_free_rate
         self.time_to_maturity = time_to_maturity
 
-    def price(self) -> float:
+    def call_price(self) -> float:
         """
-        Calculate the option price.
+        Calculate the call option price.
+        """
+        raise NotImplementedError("Subclasses should implement this method.")
+    
+    def put_price(self) -> float:
+        """
+        Calculate the put option price.
         """
         raise NotImplementedError("Subclasses should implement this method.")

@@ -15,13 +15,10 @@ class YahooFetcher(BaseFetcher):
         """
         Fetch data for the given symbol.
         """
-        # Fetch data from Yahoo Finance
         data = yf.download(self.symbol, start="2020-01-01", end=datetime.now().strftime("%Y-%m-%d"))
         
-        # Convert to DataFrame
         df = pd.DataFrame(data)
         
-        # Reset index to get date as a column
         df.reset_index(inplace=True)
         
         return df
