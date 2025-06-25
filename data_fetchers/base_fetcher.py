@@ -1,4 +1,6 @@
-class BaseFetcher:
+import abc
+
+class BaseFetcher(abc.ABC):
     """
     Base class for data fetchers.
     """

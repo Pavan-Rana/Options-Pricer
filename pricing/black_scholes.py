@@ -1,27 +1,46 @@
 from math import log, sqrt, exp
 from scipy.stats import norm
-from .strategy_base import StrategyBase
+from pricing.strategy_base import PricingStrategy
 
-class BlackScholesPricer(StrategyBase):
-    """
-    Black-Scholes option pricing model for European options.
-    This class calculates the price of European call and put options using the Black-Scholes formula.
-    """
-    def __init__(self, S, K, T, R, sigma):
-        self.S = S  # Current stock price
-        self.K = K  # Option strike price
-        self.T = T  # Time to expiration in years
-        self.R = R  # Risk-free interest rate
-        self.sigma = sigma  # Volatility of the underlying stock
+class BlackScholesStrategy(PricingStrategy):
+    def calculate(self, option, spot_price: float, volatility: float, risk_free_rate: float) -> dict:
+        """
+        Calculate the price of the option using the Black-Scholes formula.
 
-    def d1(self):
-        return (log(self.S / self.K) + (self.R + 0.5 * self.sigma ** 2) * self.T) / (self.sigma * sqrt(self.T))
-
-    def d2(self):
-        return self.d1() - self.sigma * sqrt(self.T)
-
-    def call_price(self):
-        return (self.S * norm.cdf(self.d1()) - self.K * exp(-self.R * self.T) * norm.cdf(self.d2()))
-
-    def put_price(self):
-        return (self.K * exp(-self.R * self.T) * norm.cdf(-self.d2()) - self.S * norm.cdf(-self.d1()))
+        :param option: The option to price.
+        :param spot_price: The current spot price of the underlying asset.
+        :param volatility: The volatility of the underlying asset.
+        :param risk_free_rate: The risk-free interest rate.
+        :return: A dictionary containing the calculated price and other relevant data.
+        """
+        T = option.time_to_expiration()
+        if T <= 0:
+            return {"price": 0.0, "delta": 0.0, "gamma": 0.0, "vega": 0.0, "theta": 0.0, "rho": 0.0}
+        S, K, r, sigma = spot_price, option.strike_price, risk_free_rate, volatility
+        # Calculate d1 and d2
+        d1 = (log(S / K) + (r + 0.5 * sigma ** 2) * T) / (sigma * sqrt(T))
+        d2 = d1 - sigma * sqrt(T)
+        # Calculate common factors
+        N_d1, N_d2 = norm.cdf(d1), norm.cdf(d2)
+        n_d1 = norm.pdf(d1) # Probability density function of d1 for Greeks
+        # Calculate option price and Greeks
+        if option.option_type == 'call':
+            price = S * N_d1 - K * exp(-r * T) * N_d2
+            delta = N_d1
+            theta = -(S * n_d1 * sigma) / (2 * sqrt(T)) - r * K * exp(-r * T) * N_d2
+            rho = K * T * exp(-r * T) * N_d2
+        else:
+            price = K * exp(-r * T) * norm.cdf(-d2) - S * norm.cdf(-d1)
+            delta = N_d1 - 1.0
+            theta = -(S * n_d1 * sigma) / (2 * sqrt(T)) + r * K * exp(-r * T) * norm.cdf(-d2)
+            rho = -K * T * exp(-r * T) * norm.cdf(-d2)
+        gamma = n_d1 / (S * sigma * sqrt(T))
+        vega = S * n_d1 * sqrt(T)
+        return {
+            "price": price,
+            "delta": delta,
+            "gamma": gamma,
+            "vega": vega,
+            "theta": theta,
+            "rho": rho
+        }

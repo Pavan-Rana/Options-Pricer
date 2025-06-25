@@ -1,24 +1,22 @@
-from base_fetcher import BaseFetcher
+from data_fetchers.base_fetcher import BaseFetcher
 import yfinance as yf
-from datetime import datetime
-import pandas as pd
 
 class YahooFetcher(BaseFetcher):
     """
     Fetches data from Yahoo Finance.
     """
 
-    def __init__(self, symbol: str):
-        super().__init__(symbol)
+    def __init__(self):
+        pass
 
-    def fetch_data(self):
-        """
-        Fetch data for the given symbol.
-        """
-        data = yf.download(self.symbol, start="2020-01-01", end=datetime.now().strftime("%Y-%m-%d"))
-        
-        df = pd.DataFrame(data)
-        
-        df.reset_index(inplace=True)
-        
-        return df
+    def fetch_data(self, ticker: str) -> float:
+        stock = yf.Ticker(ticker)
+        data = stock.history(period="1d")
+        if not data.empty:
+            last_price = data['Close'].iloc[-1]
+            return float(last_price)
+        info = stock.info
+        price = info.get('currentPrice') or info.get('regularMarketPrice')
+        if price is None:
+            raise ValueError(f"Could not fetch price for ticker: {ticker}")
+        return float(price)
