@@ -20,15 +20,15 @@ ticker = st.sidebar.text_input("Underlying Ticker", value="AAPL")
 strike = st.sidebar.number_input("Strike Price", min_value=0.0, value=100.0)
 expiry = st.sidebar.date_input("Expiration Date", value=date.today())
 vol = st.sidebar.number_input("Volatility (%)", min_value=0.0, value=20.0) / 100.0
-rate = st.sidebar.number_input("Risk-Free Rate (%)", min_value=0.0, value=1.0) / 100.0
+rate = st.sidebar.number_input("Risk-Free Rate (%)", min_value=0.0, value=0.01) / 100.0
 model = st.sidebar.selectbox("Pricing Model", ["Black-Scholes", "Monte Carlo"])
 
 st.sidebar.divider(width="stretch")
 st.sidebar.subheader("Heatmap Parameters")
-rate = st.sidebar.date_input("Starting Expiration Date", value=date.today())
-rate = st.sidebar.date_input("Ending Expiration Date", value=date.today())
-rate = st.sidebar.number_input("Starting Strike Price", min_value=0.0, value=100.0) / 100.0
-rate = st.sidebar.number_input("Ending Strike Price", min_value=0.0, value=100.0) / 100.0
+start_exp_date = st.sidebar.date_input("Starting Expiration Date", value=date.today())
+end_exp_date = st.sidebar.date_input("Ending Expiration Date", value=date.today())
+start_strike_price = st.sidebar.number_input("Starting Strike Price", min_value=0.0, value=100.0) / 100.0
+end_strike_price = st.sidebar.number_input("Ending Strike Price", min_value=0.0, value=100.0) / 100.0
 
 if model == "Monte Carlo":
     paths = st.slider("Monte Carlo paths", min_value=1000, max_value=100000, value=10000, step=1000)
