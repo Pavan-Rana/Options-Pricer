@@ -16,5 +16,6 @@ class PricingEngine:
             raise ValueError(f"Unknown pricing model: {model_name}")
         strategy = self.strategies[model_name]
         spot = self.data_provider.fetch_data(option.underlying_symbol)
-        result = strategy.calculate(option, spot, volatility, risk_free_rate)
-        return result
+        call_result = strategy.calculate(option, "call", spot, volatility, risk_free_rate)
+        put_result = strategy.calculate(option, "put", spot, volatility, risk_free_rate)
+        return (call_result, put_result)

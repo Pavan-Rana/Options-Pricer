@@ -6,7 +6,6 @@ class Option:
     underlying_symbol: str
     strike_price: float
     expiration_date: date
-    option_type: str  # 'call' or 'put'
 
     def time_to_expiration(self, today: date = date.today()) -> float:
         """

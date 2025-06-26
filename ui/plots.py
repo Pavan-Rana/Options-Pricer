@@ -1,10 +1,9 @@
-# ui/plots.py
 import numpy as np
 import plotly.graph_objects as go
 
 def plot_price_vs_strike(engine, base_option, volatility, risk_free_rate, strikes_delta=0.2, points=21):
     """Generate a Plotly figure for option price vs strike."""
-    base_strike = base_option.strike
+    base_strike = base_option.strike_price
     # Create an array of strikes around the base strike (e.g., ±20%)
     low = base_strike * (1 - strikes_delta)
     high = base_strike * (1 + strikes_delta)

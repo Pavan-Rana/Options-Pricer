@@ -3,7 +3,7 @@ from scipy.stats import norm
 from pricing.strategy_base import PricingStrategy
 
 class BlackScholesStrategy(PricingStrategy):
-    def calculate(self, option, spot_price: float, volatility: float, risk_free_rate: float) -> dict:
+    def calculate(self, option, option_type: str, spot_price: float, volatility: float, risk_free_rate: float) -> dict:
         """
         Calculate the price of the option using the Black-Scholes formula.
 
@@ -24,7 +24,7 @@ class BlackScholesStrategy(PricingStrategy):
         N_d1, N_d2 = norm.cdf(d1), norm.cdf(d2)
         n_d1 = norm.pdf(d1) # Probability density function of d1 for Greeks
         # Calculate option price and Greeks
-        if option.option_type == 'call':
+        if option_type == 'call':
             price = S * N_d1 - K * exp(-r * T) * N_d2
             delta = N_d1
             theta = -(S * n_d1 * sigma) / (2 * sqrt(T)) - r * K * exp(-r * T) * N_d2
