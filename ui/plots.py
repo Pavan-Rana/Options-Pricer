@@ -1,55 +1,81 @@
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 import plotly.graph_objects as go
+from domain.option import Option
 
-def plot_price_vs_strike(engine, base_option, volatility, risk_free_rate, strikes_delta=0.2, points=21):
-    """Generate a Plotly figure for option price vs strike."""
-    base_strike = base_option.strike_price
-    # Create an array of strikes around the base strike (e.g., ±20%)
-    low = base_strike * (1 - strikes_delta)
-    high = base_strike * (1 + strikes_delta)
-    strikes = np.linspace(low, high, points)
-    prices_call = []
-    prices_put = []
-    # Compute prices for call and put at each strike
-    for K in strikes:
-        opt_call = base_option  # copy might be needed if base_option is used repeatedly
-        opt_call.strike = K
-        opt_call.option_type = "call"
-        result_call = engine.calculate(opt_call, model_name="Black-Scholes", 
-                                       volatility=volatility, risk_free_rate=risk_free_rate)
-        prices_call.append(result_call["price"])
-        opt_put = base_option
-        opt_put.strike = K
-        opt_put.option_type = "put"
-        result_put = engine.calculate(opt_put, model_name="Black-Scholes", 
-                                      volatility=volatility, risk_free_rate=risk_free_rate)
-        prices_put.append(result_put["price"])
-    # Build Plotly figure
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=strikes, y=prices_call, mode='lines', name='Call Price'))
-    fig.add_trace(go.Scatter(x=strikes, y=prices_put, mode='lines', name='Put Price'))
-    fig.update_layout(title="Option Price vs Strike", xaxis_title="Strike Price", yaxis_title="Option Price")
+def generate_option_price_grid(pricing_engine, option, option_type, rate, min_spot, max_spot, min_vol, max_vol, purchase_price):
+    spot_range = np.linspace(min_spot, max_spot, 10)
+    vol_range = np.linspace(min_vol, max_vol, 10)
+    price_matrix = np.zeros((len(vol_range), len(spot_range)))
+
+    for i, vol in enumerate(vol_range):
+        for j, spot in enumerate(spot_range):
+            call_result, put_result = pricing_engine.calculate(
+                option, volatility=vol, risk_free_rate=rate, spot=spot
+            )
+            price_matrix[i, j] = call_result['price'] - purchase_price if option_type == "call" else put_result['price'] - purchase_price
+
+    return spot_range, vol_range, price_matrix
+
+
+def plot_heatmaps(pricing_engine, option_template, rate, option_type="call", min_spot=90, max_spot=120, min_vol=0.05, purchase_price=0.0, max_vol=0.5):
+    if option_type == "call":
+        spot_range, vol_range, call_prices = generate_option_price_grid(pricing_engine, option_template, "call", rate, min_spot, max_spot, min_vol, max_vol, purchase_price)
+    else:
+        spot_range, vol_range, put_prices = generate_option_price_grid(pricing_engine, option_template, "put", rate, min_spot, max_spot, min_vol, max_vol, purchase_price)
+
+    fig, axes = plt.subplots(1, 1, figsize=(14, 6))
+
+    cmap = sns.diverging_palette(10, 150, as_cmap=True)
+    if option_type == "call":
+        sns.heatmap(call_prices, annot=True, fmt=".2f", xticklabels=np.round(spot_range, 2),
+                    yticklabels=np.round(vol_range, 2), ax=axes, cmap=cmap, center=0)
+        axes.set_title("Call Price Heatmap")
+        axes.set_xlabel("Spot Price")
+        axes.set_ylabel("Volatility")
+    else:
+        sns.heatmap(put_prices, annot=True, fmt=".2f", xticklabels=np.round(spot_range, 2),
+                    yticklabels=np.round(vol_range, 2), ax=axes, cmap=cmap, center=0)
+        axes.set_title("Put Price Heatmap")
+        axes.set_xlabel("Spot Price")
+        axes.set_ylabel("Volatility")
+
+    # plt.tight_layout()
     return fig
 
-def plot_greeks_vs_strike(engine, base_option, volatility, risk_free_rate, greek="Delta", strikes_delta=0.2, points=21):
-    """Generate a Plotly figure for a given Greek vs strike."""
-    base_strike = base_option.strike
-    strikes = np.linspace(base_strike*(1-strikes_delta), base_strike*(1+strikes_delta), points)
-    greek_values_call = []
-    greek_values_put = []
-    for K in strikes:
-        opt_call = base_option
-        opt_call.strike = K
-        opt_call.option_type = "call"
-        res_c = engine.calculate(opt_call, model_name="Black-Scholes", volatility=volatility, risk_free_rate=risk_free_rate)
-        greek_values_call.append(res_c[greek.lower()])  # dictionary keys are lowercase
-        opt_put = base_option
-        opt_put.strike = K
-        opt_put.option_type = "put"
-        res_p = engine.calculate(opt_put, model_name="Black-Scholes", volatility=volatility, risk_free_rate=risk_free_rate)
-        greek_values_put.append(res_p[greek.lower()])
+
+def plot_price_vs_strike(engine, option, vol, rate):
+    strikes = np.linspace(option.strike_price * 0.8, option.strike_price * 1.2, 50)
+    prices_call = []
+    prices_put = []
+
+    for k in strikes:
+        opt = option.copy_with_new_strike(k)
+        call, put = engine.calculate(opt, model_name="Black-Scholes", volatility=vol, risk_free_rate=rate)
+        prices_call.append(call['price'])
+        prices_put.append(put['price'])
+
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=strikes, y=greek_values_call, mode='lines', name=f'Call {greek}'))
-    fig.add_trace(go.Scatter(x=strikes, y=greek_values_put, mode='lines', name=f'Put {greek}'))
-    fig.update_layout(title=f"{greek} vs Strike", xaxis_title="Strike Price", yaxis_title=f"{greek} value")
+    fig.add_trace(go.Scatter(x=strikes, y=prices_call, name="Call Price", line=dict(color='green')))
+    fig.add_trace(go.Scatter(x=strikes, y=prices_put, name="Put Price", line=dict(color='red')))
+    fig.update_layout(title="Option Prices vs Strike Price", xaxis_title="Strike Price", yaxis_title="Option Price")
+    return fig
+
+
+def plot_greeks_vs_strike(engine, option, vol, rate, greek="Delta"):
+    strikes = np.linspace(option.strike_price * 0.8, option.strike_price * 1.2, 50)
+    greek_call = []
+    greek_put = []
+
+    for k in strikes:
+        opt = option.copy_with_new_strike(k)
+        call, put = engine.calculate(opt, model_name="Black-Scholes", volatility=vol, risk_free_rate=rate)
+        greek_call.append(call[greek.lower()])
+        greek_put.append(put[greek.lower()])
+
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=strikes, y=greek_call, name=f"Call {greek}", line=dict(color='blue')))
+    fig.add_trace(go.Scatter(x=strikes, y=greek_put, name=f"Put {greek}", line=dict(color='orange')))
+    fig.update_layout(title=f"{greek} vs Strike Price", xaxis_title="Strike Price", yaxis_title=greek)
     return fig
