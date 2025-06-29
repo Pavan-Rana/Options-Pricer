@@ -11,11 +11,16 @@ def generate_option_price_grid(pricing_engine, option, option_type, rate, min_sp
 
     for i, vol in enumerate(vol_range):
         for j, spot in enumerate(spot_range):
-            call_result, put_result = pricing_engine.calculate(
-                option, volatility=vol, risk_free_rate=rate, spot=spot
-            )
-            price_matrix[i, j] = call_result['price'] - purchase_price if option_type == "call" else put_result['price'] - purchase_price
-
+            if option_type == "call":
+                option_price = pricing_engine.calculate_call(
+                    option, volatility=vol, risk_free_rate=rate, spot=spot
+                )
+            else:
+                option_price = pricing_engine.calculate_put(
+                    option, volatility=vol, risk_free_rate=rate, spot=spot
+                )
+            price_matrix[i, j] = option_price['price'] - purchase_price
+            
     return spot_range, vol_range, price_matrix
 
 
@@ -52,7 +57,7 @@ def plot_price_vs_strike(engine, option, vol, rate):
 
     for k in strikes:
         opt = option.copy_with_new_strike(k)
-        call, put = engine.calculate(opt, model_name="Black-Scholes", volatility=vol, risk_free_rate=rate)
+        call, put = engine.calculate(opt, volatility=vol, risk_free_rate=rate)
         prices_call.append(call['price'])
         prices_put.append(put['price'])
 
