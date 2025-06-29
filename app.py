@@ -32,7 +32,7 @@ vol = st.sidebar.number_input("Volatility (%)", min_value=0.0, value=20.0) / 100
 rate = st.sidebar.number_input("Risk-Free Rate (%)", min_value=0.0, value=0.01) / 100.0
 
 # Heatmap parameters
-st.sidebar.subheader("PNL Heatmap Parameters")
+st.sidebar.subheader("P&L Heatmap Parameters")
 min_spot_price = st.sidebar.number_input("Min Spot Price", min_value=1.0, value=90.0)
 max_spot_price = st.sidebar.number_input("Max Spot Price", min_value=1.0, value=120.0)
 min_vol, max_vol = st.sidebar.slider(
@@ -80,7 +80,7 @@ with put_col:
         )
 
 st.markdown("<br><br>", unsafe_allow_html=True) 
-st.title("Options PNL Heatmaps")
+st.title("Options P&L Heatmaps")
 st.markdown("Visualize PNL across different spot prices and volatilities whilst considering purchase prices.")
 call_hm_col, put_hm_col = st.columns([1, 1])
 with call_hm_col:
