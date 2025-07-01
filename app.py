@@ -3,7 +3,7 @@ from datetime import date
 from domain.option import Option
 from pricing.pricing_engine import PricingEngine
 import pandas as pd
-from ui.plots import plot_heatmaps
+from ui.plots import plot_call_heatmap, plot_put_heatmap
 
 # Initialize pricing engine
 engine = PricingEngine()
@@ -45,6 +45,9 @@ min_vol, max_vol = st.sidebar.slider(
 min_vol /= 100.0
 max_vol /= 100.0
 
+heatmap_ranges = {'min_spot': min_spot_price, 'max_spot': max_spot_price,
+                  'min_vol': min_vol, 'max_vol': max_vol}
+
 call_purchase_price = st.sidebar.number_input("Call Purchase Price", min_value=1.0, value=90.0)
 put_purchase_price = st.sidebar.number_input("Put Purchase Price", min_value=1.0, value=90.0)
 
@@ -83,63 +86,42 @@ st.markdown("<br><br>", unsafe_allow_html=True)
 st.title("Options P&L Heatmaps")
 st.markdown("Visualize PNL across different spot prices and volatilities whilst considering purchase prices.")
 call_hm_col, put_hm_col = st.columns([1, 1])
+
 with call_hm_col:
     st.markdown("### Call Heatmap")
-    fig_call = plot_heatmaps(
+    fig_call = plot_call_heatmap(
         pricing_engine=engine,
         option_template=opt,
         rate=rate,
-        option_type="call",
-        min_spot=min_spot_price,
-        max_spot=max_spot_price,
-        min_vol=min_vol,
-        max_vol=max_vol,
+        heatmap_ranges=heatmap_ranges,
         purchase_price=call_purchase_price
     )
     st.pyplot(fig_call)
 
 with put_hm_col:
     st.markdown("### Put Heatmap")
-    fig_put = plot_heatmaps(
+    fig_put = plot_put_heatmap(
         pricing_engine=engine,
         option_template=opt,
         rate=rate,
-        option_type="put",
-        min_spot=min_spot_price,
-        max_spot=max_spot_price,
-        min_vol=min_vol,
-        max_vol=max_vol,
+        heatmap_ranges=heatmap_ranges,
         purchase_price=put_purchase_price
     )
     st.pyplot(fig_put)
 
 
-greeks_call_table = pd.DataFrame([{
-    "Delta": f"{call_results['delta']:.4f}",
-    "Gamma": f"{call_results['gamma']:.4f}",
-    "Vega": f"{call_results['vega']:.4f}",
-    "Theta": f"{call_results['theta']:.4f}",
-    "Rho": f"{call_results['rho']:.4f}"
-}])
+greeks = ["Delta", "Gamma", "Vega", "Theta", "Rho"]
+greeks_call_table = pd.DataFrame([{greek: f"{call_results[greek.lower()]:.4f}" for greek in greeks}])
+greeks_put_table = pd.DataFrame([{greek: f"{put_results[greek.lower()]:.4f}" for greek in greeks}])
 
-greeks_puts_table = pd.DataFrame([{
-    "Delta": f"{put_results['delta']:.4f}",
-    "Gamma": f"{put_results['gamma']:.4f}",
-    "Vega": f"{put_results['vega']:.4f}",
-    "Theta": f"{put_results['theta']:.4f}",
-    "Rho": f"{put_results['rho']:.4f}"
-}])
-
+st.markdown("<br>", unsafe_allow_html=True)
+st.title("Greeks")
 greeks_call_col, greeks_put_col = st.columns([1, 1])
 
 with greeks_call_col:
-    # Display as a static table
-    st.markdown("<br>", unsafe_allow_html=True) 
-    st.markdown("### Greeks")
+    st.markdown("### Call Greeks")
     st.markdown(greeks_call_table.style.hide(axis="index").to_html(), unsafe_allow_html=True)
 
 with greeks_put_col:
-    # Display as a static table
-    st.markdown("<br>", unsafe_allow_html=True) 
-    st.markdown("### Greeks")
-    st.markdown(greeks_puts_table.style.hide(axis="index").to_html(), unsafe_allow_html=True)
+    st.markdown("### Put Greeks")
+    st.markdown(greeks_put_table.style.hide(axis="index").to_html(), unsafe_allow_html=True)
