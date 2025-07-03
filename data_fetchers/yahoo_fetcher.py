@@ -9,7 +9,7 @@ class YahooFetcher(BaseFetcher):
     def __init__(self):
         pass
 
-    def fetch_data(self, ticker: str) -> float:
+    def fetch_ticker_price(self, ticker: str) -> float:
         stock = yf.Ticker(ticker)
         data = stock.history(period="1d")
         if not data.empty:

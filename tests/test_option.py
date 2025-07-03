@@ -1,9 +1,15 @@
 from domain.option import Option
-import pytest
+from datetime import date
+from unittest import TestCase
 
-class TestOptions(pytest):
-    def test_option_initialization(self):
-        option = Option("AAPL", 150, "2023-12-31")
-        assert option.underlying_symbol == "AAPL"
-        assert option.strike_price == 150
-        assert option.expiration_date == "2023-12-31"
+class TestBlackScholesStrategy(TestCase):
+    def test_option_init(self):
+        test_option = Option(underlying_symbol="AAPL", strike_price=100, expiration_date="2025-07-03")
+        self.assertEqual(test_option.underlying_symbol, "AAPL")
+        self.assertEqual(test_option.strike_price, 100)
+        self.assertEqual(test_option.expiration_date, "2025-07-03")
+    
+    def test_time_to_expiration(self):
+        test_option = Option(underlying_symbol="AAPL", strike_price=100, expiration_date=date.today())
+        self.assertEqual(test_option.time_to_expiration(), 0)
+    

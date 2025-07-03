@@ -8,7 +8,7 @@ class BaseFetcher(abc.ABC):
     def __init__(self, symbol: str):
         self.symbol = symbol
 
-    def fetch_data(self):
+    def fetch_ticker_price(self):
         """
         Fetch data for the given symbol.
         """
