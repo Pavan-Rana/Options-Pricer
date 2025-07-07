@@ -27,12 +27,10 @@ def test_option_pricing(strategy, is_call):
     else:
         result = strategy.calculate_put_values(option, spot, vol, rate)
 
-    # Ensure basic keys are present
     for greek in ["price", "delta", "gamma", "vega", "theta", "rho"]:
         assert greek in result
         assert isinstance(result[greek], float)
 
-    # Simple sanity checks
     assert result["price"] > 0
     assert result["gamma"] >= 0
     assert result["vega"] >= 0
