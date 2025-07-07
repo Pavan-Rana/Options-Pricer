@@ -6,9 +6,9 @@ class BaseFetcher(abc.ABC):
     """
 
     def __init__(self, symbol: str):
-        self.symbol = symbol
+        pass
 
-    def fetch_ticker_price(self):
+    def fetch_ticker_price(self, symbol: str):
         """
         Fetch data for the given symbol.
         """
