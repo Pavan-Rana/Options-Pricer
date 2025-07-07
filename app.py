@@ -28,7 +28,7 @@ st.sidebar.subheader("Input Parameters")
 ticker = st.sidebar.text_input("Underlying Ticker", value="AAPL")
 strike = st.sidebar.number_input("Strike Price", min_value=0.0, value=100.0)
 expiry = st.sidebar.date_input("Expiration Date", value=date.today())
-vol = st.sidebar.number_input("Volatility (%)", min_value=0.0, value=20.0) / 100.0
+vol = st.sidebar.number_input("Volatility (%)", min_value=1.0, value=20.0) / 100.0
 rate = st.sidebar.number_input("Risk-Free Rate (%)", min_value=0.0, value=0.01) / 100.0
 
 # Heatmap parameters
@@ -48,8 +48,8 @@ max_vol /= 100.0
 heatmap_ranges = {'min_spot': min_spot_price, 'max_spot': max_spot_price,
                   'min_vol': min_vol, 'max_vol': max_vol}
 
-call_purchase_price = st.sidebar.number_input("Call Purchase Price", min_value=1.0, value=90.0)
-put_purchase_price = st.sidebar.number_input("Put Purchase Price", min_value=1.0, value=90.0)
+call_purchase_price = st.sidebar.number_input("Call Purchase Price", min_value=0.0, value=90.0)
+put_purchase_price = st.sidebar.number_input("Put Purchase Price", min_value=0.0, value=90.0)
 
 
 opt = Option(underlying_symbol=ticker, strike_price=strike, expiration_date=expiry)

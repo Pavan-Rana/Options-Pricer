@@ -1,8 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-import plotly.graph_objects as go
-from domain.option import Option
 
 def generate_option_price_grid(pricing_engine, option, option_type, rate, purchase_price, vol_range, spot_range):
     price_matrix = np.zeros((len(vol_range), len(spot_range)))
@@ -38,7 +36,7 @@ def plot_call_heatmap(pricing_engine, option_template, rate, heatmap_ranges, pur
 
 def plot_put_heatmap(pricing_engine, option_template, rate, heatmap_ranges, purchase_price=0.0):
     vol_range, spot_range = get_heatmap_ranges(heatmap_ranges)
-    put_prices = generate_option_price_grid(pricing_engine, option_template, "call", rate, purchase_price, vol_range, spot_range)
+    put_prices = generate_option_price_grid(pricing_engine, option_template, "put", rate, purchase_price, vol_range, spot_range)
     fig, axes = plt.subplots(1, 1, figsize=(14, 6))
 
     cmap = sns.diverging_palette(10, 150, as_cmap=True)
