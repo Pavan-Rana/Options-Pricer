@@ -1,7 +1,7 @@
 
 # Options Pricer
 
-A Streamlit-based web application for pricing European call and put options using the Black-Scholes model. This tool computes both the option price and Greeks, and visualizes the results with heatmaps.
+A Streamlit-based web application for pricing European call and put options using the Black-Scholes model. This tool computes both the option price and Greeks and visualises the results with heatmaps.
 
 ## Features
 
