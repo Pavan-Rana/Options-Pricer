@@ -9,7 +9,7 @@ A Streamlit-based web application for pricing European call and put options usin
 - Compute option Greeks: Delta, Gamma, Vega, Theta, Rho
 - Support for dynamic volatility and interest rate inputs
 - Real-time spot price fetching using Yahoo Finance
-- Interactive visualizations with Streamlit and Matplotlib
+- Interactive visualisations with Streamlit and Matplotlib
 
 ## Project Structure
 
