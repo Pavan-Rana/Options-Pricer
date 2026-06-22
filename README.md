@@ -35,7 +35,7 @@ Options-Pricer/
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/Options-Pricer.git
+git clone https://github.com/Pavan-Rana/Options-Pricer.git
 cd Options-Pricer
 
 # Create a virtual environment
